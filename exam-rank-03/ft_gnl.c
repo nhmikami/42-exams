@@ -71,7 +71,7 @@ char	*ft_strjoin(char *s1, char *s2)
 
 static char	*read_until_nl(int fd, char *line, char *buffer)
 {
-	int		bytes_read;
+	int	bytes_read;
 
 	bytes_read = 1;
 	while (bytes_read > 0)

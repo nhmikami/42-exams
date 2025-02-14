@@ -43,9 +43,8 @@ int	print_nbr(int nbr)
 
 int	print_hex(unsigned int n, const char *base)
 {
-	int			count;
+	int	count = 0;
 
-	count = 0;
 	if (n >= 16)
 	{
 		count += print_hex(n / 16, base);
@@ -58,7 +57,7 @@ int	print_hex(unsigned int n, const char *base)
 
 int print_arg(va_list args, char spec)
 {
-	int count = 0;
+	int	count = 0;
 
 	if (spec == 's')
 		count += print_str(va_arg(args, char *));
@@ -73,8 +72,8 @@ int print_arg(va_list args, char spec)
 
 int ft_printf(const char *format, ...)
 {
-	va_list args;
-	int count = 0;
+	va_list	args;
+	int	count = 0;
 
 	if (!format)
 		return (-1);
