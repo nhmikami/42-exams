@@ -32,55 +32,74 @@ int exec_cd(char **av, int i)
 	return (0);
 }
 
-int	exec_cmd(char **av, int i, char **ev, int *fd_bk)
+int	exec_cmd(char **av, int i, char **ev, int *fd_in)
 {
 	int	pid;
-	int	fd[2];
+	int	pipe_fd[2];
 	int	status = 0;
 	int	has_pipe = 0;
 
+	// verifica se há pipe
 	if (av[i] && !strcmp(av[i], "|"))
 		has_pipe = 1;
-	if (has_pipe && pipe(fd) == -1)
+	if (has_pipe && pipe(pipe_fd) == -1)
 		return (ft_error("error: fatal\n"));
 
+	// cria o processo filho
 	pid = fork();
 	if (pid == -1)
 		return (ft_error("error: fatal\n"));
 
+	// processo filho
 	if (pid == 0)
 	{
 		av[i] = NULL;
-		if (dup2(*fd_bk, 0) == -1)
-			return (ft_error("error: fatal\n"));
-		close(*fd_bk);
+		// redireciona a entrada padrão para fd_in
+		if (dup2(*fd_in, 0) == -1) {
+			ft_error("error: fatal\n");
+			exit (1);
+		}
+		close(*fd_in);
+
 		if (has_pipe)
 		{
-			if (dup2(fd[1], 1) == -1)
-				return (ft_error("error: fatal\n"));
-			close(fd[0]);
-			close(fd[1]);
+			// redireciona a saída padrão para o lado de escrita do pipe
+			if (dup2(pipe_fd[1], 1) == -1) {
+				close(pipe_fd[0]);
+				close(pipe_fd[1]);
+				ft_error("error: fatal\n");
+				exit (1);
+			}
+			close(pipe_fd[0]);
+			close(pipe_fd[1]);
 		}
+		// executa o comando
 		execve(av[0], av, ev);
 		ft_error("error: cannot execute ");
 		ft_error(av[0]);
 		ft_error("\n");
-		exit(1);
+		exit(127);
 	}
 
-	if (!has_pipe) {
-		if (dup2(0, *fd_bk) == -1)
+	// processo pai
+	if (has_pipe) {
+		// redireciona o fd_in para o lado de leitura do pipe
+		if (dup2(pipe_fd[0], *fd_in) == -1)
+			return (ft_error("error: fatal\n"));
+		close(pipe_fd[1]);
+		close(pipe_fd[0]);
+	}
+	else {
+		// redireciona o fd_in para a entrada padrão
+		if (dup2(0, *fd_in) == -1)
 			return (ft_error("error: fatal\n"));
 	}
-	else
-	{
-		close(fd[1]);
-		close(*fd_bk);
-		*fd_bk = fd[0];
-	}
+
 	if (waitpid(pid, &status, 0) == -1)
 		return (ft_error("error: fatal\n"));
-    return (status);
+    if (WIFEXITED(status))
+		return WEXITSTATUS(status);
+	return (1);
 }
 
 int	main(int ac, char **av, char **ev)
@@ -88,10 +107,10 @@ int	main(int ac, char **av, char **ev)
 	(void)ac;
 	int	i = 1;
 	int	res = 0;
-	int	fd_bk = dup(0);
+	int	fd_in = dup(0);
 	
-	if (fd_bk < 0)
-		ft_error("error: fatal\n");
+	if (fd_in < 0)
+		return (ft_error("error: fatal\n"));
 	while (av[i])
 	{
 		av = av + i;
@@ -101,11 +120,11 @@ int	main(int ac, char **av, char **ev)
 		if (!strcmp(av[0], "cd"))
 			res = exec_cd(av, i);
 		else
-			res = exec_cmd(av, i, ev, &fd_bk);
+			res = exec_cmd(av, i, ev, &fd_in);
 		if (av[i])
 			i++;
 	}
-	close(fd_bk);
+	close(fd_in);
 	return (res);
 }
 
