@@ -43,8 +43,7 @@ int	exec_cmd(char **av, int i, char **ev, int *fd_in)
 		return (ft_error("error: fatal\n"));
 
 	// processo filho
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		av[i] = NULL;
 		// redireciona a entrada padrão para fd_in
 		if (dup2(*fd_in, 0) == -1) {
@@ -53,8 +52,7 @@ int	exec_cmd(char **av, int i, char **ev, int *fd_in)
 		}
 		close(*fd_in);
 
-		if (has_pipe)
-		{
+		if (has_pipe) {
 			// redireciona a saída padrão para o lado de escrita do pipe
 			if (dup2(pipe_fd[1], 1) == -1) {
 				close(pipe_fd[0]);
@@ -98,7 +96,7 @@ int	main(int ac, char **av, char **ev)
 {
 	(void)ac;
 	int	i = 1;
-	int	res = 0;
+	int	status = 0;
 	int	fd_in = dup(0);
 	
 	if (fd_in < 0)
@@ -110,14 +108,14 @@ int	main(int ac, char **av, char **ev)
 		while (av[i] && strcmp(av[i], "|") && strcmp(av[i], ";"))
 			i++;
 		if (!strcmp(av[0], "cd"))
-			res = exec_cd(av, i);
+			status = exec_cd(av, i);
 		else
-			res = exec_cmd(av, i, ev, &fd_in);
+			status = exec_cmd(av, i, ev, &fd_in);
 		if (av[i])
 			i++;
 	}
 	close(fd_in);
-	return (res);
+	return (status);
 }
 
-// valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes --trace-children=yes ./a.out  /bin/ls | /bin/grep micro
+// valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --track-fds=yes ./a.out  /bin/ls | /bin/grep micro
