@@ -4,80 +4,72 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <sys/wait.h>
-# include <sys/types.h>
 # include <string.h> 
 
 #endif
 
-int	tmp;
-
-
-int	ft_strlen(char *str)
+int err(char *str)
 {
-	int	i = 0;
-
-	while (str[i])
-		i++;
-	return (i);
+    while (*str)
+        write(2, str++, 1);
+    return 1;
 }
 
-int	ft_error(char *str)
+int cd(char **argv, int i)
 {
-	write(2, str, ft_strlen(str));
-	return (1);
+    if (i != 2)
+        return err("error: cd: bad arguments\n");
+    else if (chdir(argv[1]) == -1)
+        return err("error: cd: cannot change directory to "), err(argv[1]), err("\n");
+    return 0;
 }
 
-int	exec_cd(char **av, int i)
+int exec(char **argv, char **envp, int i)
 {
-	if (i != 2)
-		return (ft_error("error: cd: bad arguments\n"));
-	if (chdir(av[1]) == -1)
-		return (ft_error("error: cd: cannot change dir to ") & ft_error(av[1]) & ft_error("\n"));
-	return (0);
+    int fd[2];
+    int status;
+    int has_pipe = argv[i] && !strcmp(argv[i], "|");
+
+    if (!has_pipe && !strcmp(*argv, "cd"))
+        return cd(argv, i);
+
+    if (has_pipe && pipe(fd) == -1)
+        return err("error: fatal\n");
+
+    int pid = fork();
+    if (!pid)
+    {
+        argv[i] = 0;
+        if (has_pipe && (dup2(fd[1], 1) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
+            return err("error: fatal\n");
+        if (!strcmp(*argv, "cd"))
+            return cd(argv, i);
+        execve(*argv, argv, envp);
+        return err("error: cannot execute "), err(*argv), err("\n");
+    }
+
+    waitpid(pid, &status, 0);
+    if (has_pipe && (dup2(fd[0], 0) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
+        return err("error: fatal\n");
+    return WIFEXITED(status) && WEXITSTATUS(status);
 }
 
-int	exec_cmd(char **av, int i, char **envp)
+int main(int argc, char **argv, char **envp)
 {
-	int	pid;
-	int	pip = (av[i] && !strcmp(av[i], "|"));
-	int	ret;
-	int	fd[2];
+    int    i = 0;
+    int    status = 0;
 
-	if (pip && pipe(fd) == -1)
-		return (ft_error("error: fatal\n"));
-	pid = fork();
-	if (!pid)
-	{
-		av[i] = 0;
-		if ((dup2(tmp, 0) == -1) | (close(tmp) == -1) | (pip && ((dup2(fd[1], 1) == -1) | (close(fd[0] == -1)) | (close(fd[1]) == -1))))
-			return (ft_error("error: fatal\n"));
-		execve(*av, av, envp);
-		return (ft_error("error: cannot execute ") & ft_error(*av) & ft_error("\n"));
-	}
-	if ((!pip && (dup2(0, tmp) == -1)) 
-			| (pip && ((dup2(fd[0], tmp) == -1) | (close(fd[1]) == -1) | (close(fd[0]) == -1)))
-			| (waitpid(pid, &ret, 0) == -1))
-		return (ft_error("error: fatal\n"));
-	return (WIFEXITED(ret) & WEXITSTATUS(ret));
-}
-
-int	main(int ac, char **av, char **envp)
-{
-	int	ret;
-	int	i = 0;
-
-	(void)ac;
-	tmp = dup(0);
-	while (av[i] && av[++i])
-	{
-		av = av + i;
-		i = 0;
-		while (av[i] && strcmp(av[i], "|") && strcmp(av[i], ";"))
-			i++;
-		if (!strcmp(*av, "cd"))
-			ret = exec_cd(av, i);
-		else if (i)
-			ret = exec_cmd(av, i, envp);
-	}
-	return ((dup2(0, tmp) == -1 && ft_error("error: fatal\n"))) | ret;
+    if (argc > 1)
+    {
+        while (argv[i] && argv[++i])
+        {
+            argv += i;
+            i = 0;
+            while (argv[i] && strcmp(argv[i], "|") && strcmp(argv[i], ";"))
+                i++;
+            if (i)
+                status = exec(argv, envp, i);
+        }
+    }
+    return status;
 }
