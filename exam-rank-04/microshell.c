@@ -33,7 +33,7 @@ int	exec_cmd(char **av, char **ev, int i)
 	{
 		av[i] = 0;
 		if (has_pipe && (dup2(fd[1], 1) == -1 || close(fd[0]) == -1 || close(fd[1]) == -1))
-			return err("error: fatal\n");
+			err("error: fatal\n"), exit(1);
 		execve(*av, av, ev);
 		err("error: cannot execute "), err(*av), err("\n"), exit(1);
 	}
@@ -46,7 +46,7 @@ int	exec_cmd(char **av, char **ev, int i)
 	return 1;
 }
 
-int	main(int ac, char **av, char **ep)
+int	main(int ac, char **av, char **ev)
 {
 	int	i = 1;
 	int	status = 0;
@@ -65,7 +65,7 @@ int	main(int ac, char **av, char **ep)
 			if (!strcmp(av[0], "cd"))
 				status = exec_cd(av, i);
 			else
-				status = exec_cmd(av, ep, i);
+				status = exec_cmd(av, ev, i);
 			if (!av[i] || !strcmp(av[i], ";"))
 			{
 				if (dup2(fd_stdin, 0) == -1)
