@@ -1,7 +1,7 @@
 # include <unistd.h>
 # include <stdlib.h>
-# include <sys/wait.h>
 # include <string.h> 
+# include <sys/wait.h>
 
 int	err(char *str)
 {
