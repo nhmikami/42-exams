@@ -51,9 +51,9 @@ int	main(int ac, char **av, char **ev)
 	int	i = 1;
 	int	status = 0;
 	int	fd_stdin = dup(0);
+
 	if (fd_stdin == -1)
 		return err("error: fatal\n");
-
 	if (ac > 1)
 	{
 		while (av[i])
@@ -64,13 +64,11 @@ int	main(int ac, char **av, char **ev)
 				i++;
 			if (!strcmp(av[0], "cd"))
 				status = exec_cd(av, i);
-			else
+			else if (i)
 				status = exec_cmd(av, ev, i);
 			if (!av[i] || !strcmp(av[i], ";"))
-			{
 				if (dup2(fd_stdin, 0) == -1)
 					return err("error: fatal\n");
-			}
 			if (av[i])
 				i++;
 		}
