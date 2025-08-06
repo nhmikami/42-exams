@@ -1,0 +1,24 @@
+### Set ###
+
+Uniqueness: Sets only contain distinct elements. 
+Order: The order of elements in a set is not significant. 
+Example: The set {a, b} is the same as the set {b, a}. 
+
+
+### Bags (Multisets) ###
+
+Duplicates Allowed: Bags allow elements to appear multiple times. 
+Order: Like sets, order is not significant in a bag. 
+Multiplicity: Each element in a bag has a multiplicity, indicating how many times it appears. 
+Example: The bag {a, a, b, b, b, c} has a = 2, b = 3, and c = 1. 
+
+
+
+Bags and Sets - College of Engineering | Oregon State University
+https://web.engr.oregonstate.edu/~sinisa/courses/OSU/CS261/CS261_Textbook/Chapter08.pdf
+
+Set (abstract data type) - Wikipedia
+https://en.wikipedia.org/wiki/Set_(abstract_data_type)
+
+Multiset - Wikipedia
+https://en.wikipedia.org/wiki/Multiset
