@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-char	**create_board(int w, int h);
-void	free_board(char **b, int h);
-void	print_board(char **b, int w, int h);
+int		**create_board(int w, int h);
+void	free_board(int **b, int h);
+void	print_board(int **b, int w, int h);
 
-void	read_input(char **b, int w, int h);
-char	**update_board(char **b, int w, int h);
-int     count_neighbors(char **b, int x, int y, int w, int h);
+void	read_input(int **b, int w, int h);
+int		**update_board(int **b, int w, int h);
+int		count_neighbors(int **b, int w, int h, int x, int y);
 
 #endif

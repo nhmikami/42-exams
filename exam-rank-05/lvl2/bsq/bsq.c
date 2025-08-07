@@ -1,27 +1,24 @@
 #include "bsq.h"
 
-// utils
-void	print_error(void) {
-	fprintf(stderr, "map error\n");
-}
+// cc -Wall -Werror -Wextra bsq.c
 
+// utils
 void	print_map(t_map *map) {
 	if (!map || !map->grid)
 		return ;
-
-	for (int i = 0; i < map->rows; i++) {
-		fprintf(stdout, "%s", map->grid[i]);
-		fprintf(stdout, "\n");
-	}
+	for (int i = 0; i < map->rows; i++)
+		fprintf(stdout, "%s\n", map->grid[i]);
 }
 
 void	free_map(t_map *map) {
 	for (int i = 0; i < map->rows; i++) {
-		if (map->grid[i])
+		if (map->grid && map->grid[i])
 			free(map->grid[i]);
 	}
-	if (map->grid)
+	if (map->grid) {
 		free(map->grid);
+		map->grid = NULL;
+	}
 }
 
 size_t	ft_strlen(char *s) {
@@ -36,7 +33,7 @@ int	is_printable(char c) {
 }
 
 // input
-t_map	*read_file(char *file, t_map *map) {
+t_map	*read_file(t_map *map, char *file) {
 	FILE	*fp = file ? fopen(file, "r") : stdin;
 	if (!fp)
 		return (NULL);
@@ -71,6 +68,14 @@ t_map	*read_file(char *file, t_map *map) {
 			if (file) fclose(fp);
 			return (NULL);
 		}
+
+		for (int j = 0; j < map->cols; j++) {
+			if (line[j] != map->empty && line[j] != map->obstacle) {
+				free(line);
+				if (file) fclose(fp);
+				return (NULL);
+			}
+		}
 		map->grid[i] = line;
 	}
 
@@ -82,32 +87,22 @@ t_map	*read_file(char *file, t_map *map) {
 		return (NULL);
 	}
 	free(extra);
-
-	if (file)
-		fclose(fp);
-
-	for (int i = 0; i < map->rows; i++) {
-		for (int j = 0; j < map->cols; j++) {
-			char c = map->grid[i][j];
-			if (c != map->empty && c != map->obstacle)
-				return (NULL);
-		}
-	}
+	if (file) fclose(fp);
 	return (map);
 }
 
-void	process_input(char *file, t_map *map) {
-	if (read_file(file, map) != NULL) {
+void	process_input(t_map *map, char *file) {
+	if (read_file(map, file) != NULL) {
 		solve_bsq(map);
 		print_map(map);
 	}
 	else
-		print_error();
+		fprintf(stderr, "map error\n");
 	free_map(map);
 }
 
 // solve
-int	min_sqr(int a, int b, int c) {
+int	min3(int a, int b, int c) {
 	if (a <= b && a <= c)
 		return a;
 	if (b <= a && b <= c)
@@ -120,7 +115,7 @@ void	solve_bsq(t_map *map) {
 	for (int i = 0; i < map->rows; i++)
 		dp[i] = calloc(map->cols, sizeof(int));
 	
-	int	max_size = 0;
+	int	max = 0;
 	int	max_row = 0;
 	int	max_col = 0;
 	for (int r = 0; r < map->rows; r++) {
@@ -129,9 +124,9 @@ void	solve_bsq(t_map *map) {
 				if (r == 0 || c == 0)
 					dp[r][c] = 1;
 				else
-					dp[r][c] = min_sqr(dp[r - 1][c], dp[r][c - 1], dp[r - 1][c - 1]) + 1;
-				if (dp[r][c] > max_size) {
-					max_size = dp[r][c];
+					dp[r][c] = min3(dp[r - 1][c], dp[r][c - 1], dp[r - 1][c - 1]) + 1;
+				if (dp[r][c] > max) {
+					max = dp[r][c];
 					max_row = r;
 					max_col = c;
 				}
@@ -139,10 +134,9 @@ void	solve_bsq(t_map *map) {
 		}
 	}
 
-	for (int r = max_row - max_size + 1; r <= max_row; r++) {
-		for (int c = max_col - max_size + 1; c <= max_col; c++) {
+	for (int r = max_row - max + 1; r <= max_row; r++) {
+		for (int c = max_col - max + 1; c <= max_col; c++)
 			map->grid[r][c] = map->full;
-		}
 	}
 
 	for (int i = 0; i < map->rows; i++)
@@ -154,23 +148,19 @@ void	solve_bsq(t_map *map) {
 int	main(int ac, char **av) {
 	t_map	*map = calloc(1, sizeof(t_map));
 	if (!map) {
-		print_error();
+		fprintf(stderr, "map error\n");
 		return (1);
 	}
 
 	if (ac < 2)
-		process_input(NULL, map);
+		process_input(map, NULL);
 	else {
-		int i = 1;
-		while (i < ac) {
+		for (int i = 1; i < ac; i++) {
 			if (i > 1)
 				fprintf(stdout, "\n");
-			process_input(av[i], map);
-			i++;
+			process_input(map, av[i]);
 		}
 	}
 	free(map);
 	return (0);
 }
-
-// cc -Wall -Werror -Wextra bsq.c

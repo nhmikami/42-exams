@@ -3,11 +3,14 @@
 
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include <string>
 
 class bigint {
 	private:
 		std::string _digits;
+		
+		void	_remove_leading_zeros(void);
 
 	public:
 		bigint(void);
@@ -46,6 +49,6 @@ class bigint {
 		const std::string&	getDigits(void) const;
 };
 
-std::ostream&	operator<<(std::ostream& out, const bigint& num);
+std::ostream&	operator<<(std::ostream& out, const bigint& n);
 
 #endif

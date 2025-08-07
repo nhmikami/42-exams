@@ -16,11 +16,9 @@ bigint::bigint(unsigned int value) {
 	}
 }
 
-bigint::bigint(const bigint& other) : _digits(other._digits) {
-}
+bigint::bigint(const bigint& other) : _digits(other._digits) {}
 
-bigint::~bigint(void) {
-}
+bigint::~bigint(void) {}
 
 // assignment operator
 bigint& bigint::operator=(const bigint& other) {
@@ -183,5 +181,3 @@ std::ostream& operator<<(std::ostream& out, const bigint& n) {
 	}
 	return out;
 }
-
-// c++ -Wall -Werror -Wextra -std=c++98 main.cpp bigint.cpp 

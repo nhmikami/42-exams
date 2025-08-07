@@ -16,15 +16,14 @@ typedef struct s_map {
 }	t_map;
 
 int		is_printable(char c);
-void	print_error(void);
 void	print_map(t_map *map);
 void	free_map(t_map *map);
 size_t	ft_strlen(char *s);
 
-t_map	*read_file(char *file, t_map *map);
-void	process_input(char *file, t_map *map);
+t_map	*read_file(t_map *map, char *file);
+void	process_input(t_map *map, char *file);
 
-int		min_sqr(int a, int b, int c);
+int		min3(int a, int b, int c);
 void	solve_bsq(t_map *map);
 
 #endif

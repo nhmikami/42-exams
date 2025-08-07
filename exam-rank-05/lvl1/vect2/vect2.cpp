@@ -124,5 +124,3 @@ std::ostream& operator<<(std::ostream& out, const vect2& v) {
 	out << "{" << v.getX() << ", " << v.getY() << "}";
 	return out;
 }
-
-// c++ -Wall -Werror -Wextra -std=c++98 main.cpp vect2.cpp 

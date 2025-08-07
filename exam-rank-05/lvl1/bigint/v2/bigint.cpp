@@ -1,21 +1,40 @@
 #include "bigint.hpp"
 
 // constructors and destructor
-bigint::bigint(void) : _digits("0") {
-}
+bigint::bigint(void) : _digits("0") {}
 
 bigint::bigint(unsigned int value) {
-	_digits = std::to_string(value);
+	std::stringstream ss;
+	ss << value;
+	_digits = ss.str();
 }
 
-bigint::bigint(const std::string& value) : _digits(value) {
+bigint::bigint(const std::string& value) {
+	if (value.empty())
+		throw std::invalid_argument("invalid input");
+
+	std::string::const_iterator start = value.begin();
+	std::string::const_iterator end = value.end();
+	while (start != end) {
+		if (!std::isdigit(*start))
+			throw std::invalid_argument("invalid input");
+		++start;
+	}
+	_digits = value;
+	_remove_leading_zeros();
 }
 
-bigint::bigint(const bigint& other) : _digits(other._digits) {
+void	bigint::_remove_leading_zeros(void) {
+	std::string::size_type pos = _digits.find_first_not_of('0');
+	if (pos == std::string::npos)
+		_digits = "0";
+	else
+		_digits.erase(0, pos);
 }
 
-bigint::~bigint(void) {
-}
+bigint::bigint(const bigint& other) : _digits(other._digits) {}
+
+bigint::~bigint(void) {}
 
 // assignment operator
 bigint& bigint::operator=(const bigint& other) {
@@ -101,15 +120,11 @@ bigint bigint::operator>>(int i) const {
 }
 
 bigint& bigint::operator<<=(int i) {
-	if (i < 0)
-		return *this >>= -i;
 	_digits += std::string(i, '0');
 	return *this;
 }
 
 bigint& bigint::operator>>=(int i) {
-	if (i < 0)
-		return *this <<= -i;
 	if ((size_t)i >= _digits.size())
 		_digits = "0";
 	else
@@ -118,12 +133,16 @@ bigint& bigint::operator>>=(int i) {
 }
 
 bigint& bigint::operator<<=(const bigint& other) {
-	int shift = std::stoi(other._digits);
+	std::istringstream iss(other._digits);
+	int shift;
+	iss >> shift;
 	return *this <<= shift;
 }
 
 bigint& bigint::operator>>=(const bigint& other) {
-	int shift = std::stoi(other._digits);
+	std::istringstream iss(other._digits);
+	int shift;
+	iss >> shift;
 	return *this >>= shift;
 }
 
@@ -137,5 +156,3 @@ std::ostream& operator<<(std::ostream& out, const bigint& n) {
 	out << n.getDigits();
 	return out;
 }
-
-// c++ -Wall -Werror -Wextra -std=c++98 main.cpp bigint.cpp 

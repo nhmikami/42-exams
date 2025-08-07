@@ -1,5 +1,7 @@
 #include "bigint.hpp"
 
+// c++ -Wall -Werror -Wextra -std=c++98 main.cpp bigint.cpp 
+
 int	main(void)
 {
 	const bigint	a(42);

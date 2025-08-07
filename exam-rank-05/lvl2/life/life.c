@@ -1,20 +1,22 @@
 #include "life.h"
 
+// cc -Wall -Werror -Wextra life.c
+
 // utils
-char	**create_board(int w, int h) {
-	char	**b = calloc(h, sizeof(char *));
+int	**create_board(int w, int h) {
+	int	**b = calloc(h, sizeof(int *));
 	if (!b)
 		return (NULL);
 	
 	for (int i = 0; i < h; i++) {
-		b[i] = calloc(w, sizeof(char));
+		b[i] = calloc(w, sizeof(int));
 		if (!b[i])
 			return (NULL);
 	}
 	return (b);
 }
 
-void	free_board(char **b, int h) {
+void	free_board(int **b, int h) {
 	for (int i = 0; i < h; i++) {
 		if (b[i])
 			free(b[i]);
@@ -23,7 +25,7 @@ void	free_board(char **b, int h) {
 		free(b);
 }
 
-void	print_board(char **b, int w, int h) {
+void	print_board(int **b, int w, int h) {
 	for (int i = 0; i < h; i++) {
 		for (int j = 0; j < w; j++) {
 			if (b[i][j])
@@ -36,7 +38,7 @@ void	print_board(char **b, int w, int h) {
 }
 
 // board
-void	read_input(char **b, int w, int h) {
+void	read_input(int **b, int w, int h) {
 	int		x = 0;
 	int		y = 0;
 	int		draw = 0;
@@ -58,66 +60,52 @@ void	read_input(char **b, int w, int h) {
 	}
 }
 
-char	**update_board(char **b, int w, int h) {
-	int		n;
-	char	**new = create_board(w, h);
-
-	for (int i = 0; i < h; i++) {
-		for (int j = 0; j < w; j++) {
-			n = count_neighbors(b, j, i, w, h);
-			if (b[i][j] && (n == 2 || n == 3))
-				new[i][j] = 1;
-			else if (!b[i][j] && n == 3)
-				new[i][j] = 1;
+int	**update_board(int **b, int w, int h) {
+	int	**new = create_board(w, h);
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			int n = count_neighbors(b, w, h, x, y);
+			if (b[y][x] && (n == 2 || n == 3))
+				new[y][x] = 1;
+			else if (!b[y][x] && n == 3)
+				new[y][x] = 1;
 			else
-				new[i][j] = 0;
+				new[y][x] = 0;
 		}
 	}
 	free_board(b, h);
 	return (new);
 }
 
-int	count_neighbors(char **b, int x, int y, int w, int h) {
+int	count_neighbors(int **b, int w, int h, int x, int y) {
 	int count = 0;
 	for (int i = -1; i <= 1; i++) {
 		for (int j = -1; j <= 1; j++) {
-			if (i || j)
-				if (y + i >= 0 && y + i < h && x + j >= 0 && x + j < w)
-					if (b[y + i][x + j])
-						count++;
+			if ((i || j) && y + i >= 0 && y + i < h && x + j >= 0 && x + j < w)
+				if (b[y + i][x + j])
+					count++;
 		}
 	}
-
 	return (count);
 }
 
 // main
 int main(int ac, char **av) {
-	int		width, height, iterations;
-	char	**board;
-
 	if (ac != 4)
 		return 1;
 
-	width = atoi(av[1]);
-	height = atoi(av[2]);
-	iterations = atoi(av[3]);
+	int	width = atoi(av[1]);
+	int	height = atoi(av[2]);
+	int	iterations = atoi(av[3]);
 	if (width <= 0 || height <= 0 || iterations < 0)
 		return 1;
 
-	board = create_board(width, height);
-	if (!board)
-		return 1;
-
+	int	**board = create_board(width, height);
 	read_input(board, width, height);
 	for (int i = 0; i < iterations; i++) {
 		board = update_board(board, width, height);
 	}
-
 	print_board(board, width, height);
 	free_board(board, height);
-
 	return 0;
 }
-
-// cc -Wall -Werror -Wextra life.c

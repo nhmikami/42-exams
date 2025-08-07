@@ -1,5 +1,7 @@
 #include "vect2.hpp"
 
+// c++ -Wall -Werror -Wextra -std=c++98 main.cpp vect2.cpp 
+
 int main(void) {
     
     vect2 v1;           // 0, 0
