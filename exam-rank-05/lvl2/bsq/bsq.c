@@ -147,10 +147,6 @@ void	solve_bsq(t_map *map) {
 // main
 int	main(int ac, char **av) {
 	t_map	*map = calloc(1, sizeof(t_map));
-	if (!map) {
-		fprintf(stderr, "map error\n");
-		return (1);
-	}
 
 	if (ac < 2)
 		process_input(map, NULL);

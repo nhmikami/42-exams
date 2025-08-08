@@ -6,9 +6,9 @@
 class set {
 	private:
 		searchable_bag* bag;
+		set();
 
 	public:
-		set();
 		set(searchable_bag& b);
 		set(const set& other);
 		~set();

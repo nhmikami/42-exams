@@ -6,27 +6,31 @@ set::set(searchable_bag& b) : bag(&b) {}
 
 set::set(const set& other) {
 	if (other.bag)
-		this->bag = other.bag;
+		bag = other.bag;
 	else
-		this->bag = 0;
+		bag = 0;
 }
 
 set::~set() {}
 
 set& set::operator=(const set& other) {
-	if (this != &other)
-		this->bag = other.bag;
+	if (this != &other) {
+		if (other.bag)
+			bag = other.bag;
+		else
+			bag = 0;
+	}
 	return *this;
 }
 
 void set::insert(int item) {
-	if (bag && !(*bag).has(item))
+	if (bag && !has(item))
 		(*bag).insert(item);
 }
 
 void set::insert(int* items, int size) {
 	for (int i = 0; i < size; i++)
-		if (!has(items[i]))
+		if (bag && !has(items[i]))
 			(*bag).insert(items[i]);
 }
 

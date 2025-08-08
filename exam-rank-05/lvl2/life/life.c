@@ -5,14 +5,8 @@
 // utils
 int	**create_board(int w, int h) {
 	int	**b = calloc(h, sizeof(int *));
-	if (!b)
-		return (NULL);
-	
-	for (int i = 0; i < h; i++) {
+	for (int i = 0; i < h; i++)
 		b[i] = calloc(w, sizeof(int));
-		if (!b[i])
-			return (NULL);
-	}
 	return (b);
 }
 
