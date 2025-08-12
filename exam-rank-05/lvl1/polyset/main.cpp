@@ -47,22 +47,25 @@ int main(int ac, char **av)
 		sa.insert(atoi(av[i]));
 	}
 
-	std::cout << "[Set] Before inserting duplicates:" << std::endl;
+	std::cout << "[set] before inserting duplicates:" << std::endl;
 	sa.print();
 
 	sa.insert(atoi(av[1]));
-	std::cout << "[Set] After attempting to insert duplicate:" << std::endl;
-	sa.print();
+	std::cout << "[set] after attempting to insert duplicate:" << std::endl;
+	sa.get_bag().print();
 
 	int arr[] = {1, 2, 30, 40};
 	sa.insert(arr, 4);
 
-	std::cout << "[Set] After insert(int*, int) with possible duplicates:\n";
+	std::cout << "[set] after insert(int*, int) with possible duplicates:\n";
 	sa.print();
+	std::cout << std::endl;
 
-	std::cout << sa.has(40) << std::endl;
-	sa.print();
-	st.print();
+	std::cout << "set has value 40? " << sa.has(40) << std::endl;
+	std::cout << "print set a: ";
+	sa.get_bag().print();
+	std::cout << "print set t: ";
+	st.get_bag().print();
 
 	delete t;
 	delete a;
