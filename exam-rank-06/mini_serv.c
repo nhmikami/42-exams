@@ -72,7 +72,7 @@ void fatal_error(void) {
 	exit(1);
 }
 
-void notify_others(int fd, char *msg) {
+void queue_msg(int fd, char *msg) {
 	for (int i = 0; i <= max_fd; i++) {
 		if (FD_ISSET(i, &afds) && i != fd && i != sockfd) {
 			outbox[i] = str_join(outbox[i], msg);
@@ -86,10 +86,10 @@ void send_msg(int fd) {
 	char *msg;
 	int ret;
 
-	while (ret = extract_message(&inbox[fd], &msg) > 0) {
+	while ((ret = extract_message(&inbox[fd], &msg)) > 0) {
 		sprintf(write_buf, "client %d: ", ids[fd]);
-		notify_others(fd, write_buf);
-		notify_others(fd, msg);
+		queue_msg(fd, write_buf);
+		queue_msg(fd, msg);
 		free(msg);
 	}
 	if (ret < 0)
@@ -121,13 +121,13 @@ void accept_client(int fd) {
 	outbox[fd] = 0;
 	FD_SET(fd, &afds);
 	sprintf(write_buf, "server: client %d just arrived\n", ids[fd]);
-	notify_others(fd, write_buf);
+	queue_msg(fd, write_buf);
 }
 
 void disconnect_client(int fd) {
 	sprintf(write_buf, "server: client %d just left\n", ids[fd]);
 	FD_CLR(fd, &afds);
-	notify_others(fd, write_buf);
+	queue_msg(fd, write_buf);
 	free(inbox[fd]);
 	inbox[fd] = 0;
 	free(outbox[fd]);
